@@ -202,7 +202,7 @@ class WorkQueue
 	# The request is only carried out if necessary.
 	#
 	def spawn_thread
-		if cur_threads < max_threads and @tasks.num_waiting <= 0
+		if cur_threads < max_threads and @tasks.num_waiting <= 0 and cur_tasks > 0
 			@threads_lock.synchronize { 
 				@threads << Thread.new do
 					begin
