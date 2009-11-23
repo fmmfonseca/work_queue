@@ -6,7 +6,7 @@
 # This file contains an implementation of a work queue structure.
 #
 # == Version
-# 0.1.0
+# 0.1.1
 #
 # == Author
 # Miguel Fonseca <fmmfonseca@gmail.com>
@@ -28,16 +28,16 @@ require 'timeout'
 # A tunable work queue, designed to coordinate work between a producer and a set of worker threads.
 #
 # == Usage
-#  wq = WorkQueue.new(1)
+#  wq = WorkQueue.new
 #  wq.enqueue_b { puts "Hello from the WorkQueue" }
 #  wq.join
 #
 class WorkQueue
 	
-	VERSION = "0.1.0"
+	VERSION = "0.1.1"
 	
 	##
-	# Creates a new work queue.
+	# Creates a new work queue with the desired parameters.
 	#	
 	#  wq = WorkQueue.new(5,10,20)
 	#
@@ -57,6 +57,8 @@ class WorkQueue
 	# Returns the maximum number of worker threads.
 	# This value is set upon initialization and cannot be changed afterwards.
 	#
+	#  wq = WorkQueue.new()
+	#  wq.max_threads		#=> Infinity
 	#  wq = WorkQueue.new(1)
 	#  wq.max_threads		#=> 1
 	#
@@ -81,6 +83,8 @@ class WorkQueue
 	# Returns the maximum number of queued tasks.
 	# This value is set upon initialization and cannot be changed afterwards.
 	#
+	#  wq = WorkQueue.new()
+	#  wq.max_tasks		#=> Infinity
 	#  wq = WorkQueue.new(nil,1)
 	#  wq.max_tasks		#=> 1
 	#
@@ -116,7 +120,7 @@ class WorkQueue
 	end
 	
 	##
-	# Schedules the given Proc for execution by a worker thread.
+	# Schedules the given Proc for future execution by a worker thread.
 	# If there is no space left in the queue, waits until space becomes available.
 	#
 	#  wq = WorkQueue.new(1)
@@ -129,7 +133,7 @@ class WorkQueue
 	end
 	
 	##
-	# Schedules the given Block for execution by a worker thread.
+	# Schedules the given Block for future execution by a worker thread.
 	# If there is no space left in the queue, waits until space becomes available.
 	#
 	#  wq = WorkQueue.new(1)
@@ -142,7 +146,7 @@ class WorkQueue
 	end
 	
 	##
-	# Waits until the tasks queue is empty.
+	# Waits until the tasks queue is empty and all worker threads have finished.
 	#
 	#  wq = WorkQueue.new(1)
 	#  wq.enqueue_b { sleep(1) }
@@ -194,7 +198,8 @@ class WorkQueue
 	end
 	
 	##
-	# Spawns a new worker thread.
+	# Enrolls a new worker thread.
+	# The request is only carried out if necessary.
 	#
 	def spawn_thread
 		if cur_threads < max_threads and @tasks.num_waiting <= 0
@@ -211,7 +216,8 @@ class WorkQueue
 	end
 	
 	##
-	# Dismisses an existing worker thread.
+	# Instructs an idle worker thread to exit.
+	# The request is only carried out if necessary.
 	#
 	def dismiss_thread
 		@tasks << [Proc.new { Thread.exit }, nil] if cur_threads > 0
