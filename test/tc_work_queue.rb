@@ -78,10 +78,13 @@ class TC_WorkQueue < Test::Unit::TestCase
 	def test_stress
 		a = []
 		m = Mutex.new
-		wq = WorkQueue.new(100)
-		(1..1000).each {
-			wq.enqueue_b(a,m) { |str,mut| sleep(0.01); mut.synchronize { a.push nil } }
-		}
+		wq = WorkQueue.new(100,200,0.1)
+		(1..1000).each do
+			wq.enqueue_b(a,m) { |str,mut| 
+			  sleep(0.01)
+			  mut.synchronize { a.push nil }
+		  }
+		end
 		wq.join
 		assert_equal(a.size, 1000)
 	end
