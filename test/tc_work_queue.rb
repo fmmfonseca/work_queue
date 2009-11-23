@@ -28,11 +28,11 @@ class TC_WorkQueue < Test::Unit::TestCase
 	def test_enqueue
 		s = String.new
 		wq = WorkQueue.new
-		# Using Proc
+		# using proc
 		wq.enqueue_p(Proc.new { |str| str.replace("Hello #1") }, s)
 		wq.join
 		assert_equal(s, "Hello #1")
-		# Using Block
+		# using block
 		wq.enqueue_b(s) { |str| str.replace("Hello #2") }
 		wq.join
 		assert_equal(s, "Hello #2")
@@ -81,9 +81,9 @@ class TC_WorkQueue < Test::Unit::TestCase
 		wq = WorkQueue.new(100,200,0.1)
 		(1..1000).each do
 			wq.enqueue_b(a,m) { |str,mut| 
-			  sleep(0.01)
-			  mut.synchronize { a.push nil }
-		  }
+				sleep(0.01)
+				mut.synchronize { a.push nil }
+			}
 		end
 		wq.join
 		assert_equal(a.size, 1000)
