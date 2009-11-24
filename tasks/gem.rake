@@ -7,7 +7,7 @@ CLEAN.include("pkg")
 spec = Gem::Specification.new do |s|
 	s.name = "work_queue"
 	s.version = WorkQueue::VERSION
-	s.summary = "A tunable work queue, designed to coordinate work between a producer and a set of worker threads."
+	s.summary = "A tunable work queue, designed to coordinate work between a producer and a pool of worker threads."
 	s.homepage = "http://github.com/fmmfonseca/work_queue"
 	s.author = "Miguel Fonseca"
 	s.email = "fmmfonseca@gmail.com"

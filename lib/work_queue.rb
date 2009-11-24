@@ -25,7 +25,7 @@ require 'timeout'
 # = WorkQueue
 #
 # == Description
-# A tunable work queue, designed to coordinate work between a producer and a set of worker threads.
+# A tunable work queue, designed to coordinate work between a producer and a pool of worker threads.
 #
 # == Usage
 #  wq = WorkQueue.new
