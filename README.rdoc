@@ -25,3 +25,12 @@ Run the code:
   wq = WorkQueue.new
   wq.enqueue_b { puts "Hello from the WorkQueue" }
   wq.join
+
+Note that you generally want to bound the resources used:
+
+  # Limit the maximum number of simultaneous worker threads
+  WorkQueue.new(10)
+  # Limit the maximum number of queued tasks
+  WorkQueue.new(nil,20)
+  # Limit the maximum time to preserve idle worker threads
+  WorkQueue.new(nil,nil,10)
