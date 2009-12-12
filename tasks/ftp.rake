@@ -18,12 +18,12 @@ module Rake
 		attr_accessor :host
 		
 		##
-		# The user name required to log into the server (default is "").
+		# The user name required to log into the server (default is "anonymous").
 		#
 		attr_accessor :user_name
 		
 		##
-		# The password required for the selected user name (default is "").
+		# The password required for the selected user name (default is nil).
 		#
 		attr_accessor :password
 		
@@ -47,8 +47,8 @@ module Rake
 		#
 		def initialize(config_file=nil)
 			@host = nil
-			@user_name = ""
-			@password = ""
+			@user_name = "anonymous"
+			@password = nil
 			@path = ""
 			@upload_files = []
 			@verbose = false
@@ -79,7 +79,7 @@ module Rake
 		def load_config(file)
 			config = YAML::load_file(file)
 			@host = config["host"]
-			@username = config["user_name"]
+			@user_name = config["user_name"]
 			@password = config["password"]
 			@path = config["path"]
 		end
@@ -88,7 +88,7 @@ module Rake
 		# Establishes an FTP connection.
 		#
 		def connect
-			@ftp = Net::FTP.new(@host, @username, @password)
+			@ftp = Net::FTP.new(@host, @user_name, @password)
 			puts "Connected to #{@host}" if @verbose
 			puts "Using #{@ftp.binary ? "binary" : "text"} mode to transfer files" if @verbose
 			unless @path.nil? or @path.empty?
