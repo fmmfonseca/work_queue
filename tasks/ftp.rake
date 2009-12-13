@@ -78,10 +78,10 @@ module Rake
 		#
 		def load_config(file)
 			config = YAML::load_file(file)
-			@host = config["host"]
-			@user_name = config["user_name"]
-			@password = config["password"]
-			@path = config["path"]
+			@host = config["host"] || @host
+			@user_name = config["user_name"] || @user_name
+			@password = config["password"] || @password
+			@path = config["path"] || @path
 		end
 		
 		##
