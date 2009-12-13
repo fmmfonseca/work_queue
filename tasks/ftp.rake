@@ -7,8 +7,32 @@ require 'rake/tasklib'
 
 module Rake
 	
-	##
+	# = FTPTask
+	#
+	# == Description
 	# A Rake task that transfers local files to an FTP server.
+	#
+	# == Usage
+	#  Rake::FTPTask.new do |t|
+	#   t.host = "ftp.example.com"
+	#   t.user_name = "user"
+	#   t.password = "pass"
+	#   t.path = "public_html/"
+	#   t.upload_files = FileList["doc/**/*"].to_a
+	#  end
+	#
+	# To avoid hard-coding the connection configuration into the source code, the task can obtain that data from a YAML file.
+	#
+	#  Rake::FTPTask.new("ftp.yml") do |t|
+	#   t.path = "public_html/"
+	#   t.upload_files = FileList["doc/**/*"].to_a
+	#  end
+	#
+	#  # ftp.yml
+	#  host = ftp.example.com
+	#  user_name = user
+	#  password = pass
+	#  path = public_html/ 
 	#
 	class FTPTask < TaskLib
 		
@@ -38,7 +62,7 @@ module Rake
 		attr_accessor :upload_files
 		
 		##
-		# A flag that enables printing debug messages to standard output when true (default is false).
+		# The boolean to enable progress messages when true (default is false).
 		#
 		attr_accessor :verbose
 		
@@ -74,7 +98,7 @@ module Rake
 		private
 		
 		##
-		# Read configuration values from a YAML file.
+		# Reads configuration values from a YAML file.
 		#
 		def load_config(file)
 			config = YAML::load_file(file)
@@ -85,7 +109,7 @@ module Rake
 		end
 		
 		##
-		# Establishes an FTP connection.
+		# Establishes the FTP connection.
 		#
 		def connect
 			@ftp = Net::FTP.new(@host, @user_name, @password)
@@ -131,7 +155,7 @@ module Rake
 		end
 		
 		##
-		# Creates a directory and all its parent directories, relative to the current working directory.
+		# Creates a directory and all its parent directories in the server, relative to the current working directory.
 		#
 		def make_dirs(name)
 			Pathname.new(name).descend do |dir|
