@@ -154,7 +154,7 @@ class WorkQueue
 	#
 	def join
 		cur_threads.times { dismiss_thread }
-		@threads.dup.each { |t| t.join }
+		@threads.dup.each { |thread| thread.join }
 		self
 	end
 	
@@ -166,7 +166,7 @@ class WorkQueue
 	#  wq.stop
 	#
 	def stop
-		@threads.dup.each { |t| t.exit.join }
+		@threads.dup.each { |thread| thread.exit.join }
 		@tasks.clear
 		self
 	end
