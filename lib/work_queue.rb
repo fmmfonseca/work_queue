@@ -6,13 +6,13 @@
 # This file contains an implementation of a work queue structure.
 #
 # == Version
-# 0.1.1
+# 0.1.2
 #
 # == Author
 # Miguel Fonseca <fmmfonseca@gmail.com>
 #
 # == Copyright
-# Copyright 2009 Miguel Fonseca
+# Copyright 2009-2010 Miguel Fonseca
 #
 # == License
 # MIT (see LICENSE file)
@@ -34,7 +34,7 @@ require 'timeout'
 #
 class WorkQueue
 	
-	VERSION = "0.1.1"
+	VERSION = "0.1.2"
 	
 	##
 	# Creates a new work queue with the desired parameters.

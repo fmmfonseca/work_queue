@@ -9,7 +9,7 @@
 # Miguel Fonseca <fmmfonseca@gmail.com>
 #
 # == Copyright
-# Copyright 2009 Miguel Fonseca
+# Copyright 2009-2010 Miguel Fonseca
 #
 # == License
 # MIT (see LICENSE file)
