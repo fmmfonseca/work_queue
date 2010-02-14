@@ -1,5 +1,4 @@
 require 'rake/gempackagetask'
-require 'lib/work_queue'
 
 CLEAN.include("pkg")
 
@@ -16,8 +15,8 @@ spec = Gem::Specification.new do |s|
   s.files = FileList["LICENSE", "Rakefile", "README.rdoc", "tasks/*.rake", "lib/**/*.rb", "test/tc_*.rb"].to_a
   s.test_files = Dir.glob("test/tc_*.rb")
   s.has_rdoc = true
-  s.extra_rdoc_files = %w[README.rdoc]
-  s.rdoc_options = %w[--line-numbers --inline-source --title WorkQueue --main README.rdoc]
+  s.extra_rdoc_files = %w[README.rdoc LICENSE]
+  s.rdoc_options = %w[--line-numbers --inline-source --main README.rdoc]
 end
 
 # For a list of all attributes refer to http://rake.rubyforge.org/classes/Rake/PackageTask.html
