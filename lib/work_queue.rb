@@ -6,7 +6,7 @@
 # This file contains an implementation of a work queue structure.
 #
 # == Version
-# 0.1.2
+# 1.0.0
 #
 # == Author
 # Miguel Fonseca <fmmfonseca@gmail.com>
@@ -34,7 +34,7 @@ require 'timeout'
 #
 class WorkQueue
 
-  VERSION = "0.1.2"
+  VERSION = "1.0.0"
 
   ##
   # Creates a new work queue with the desired parameters.
