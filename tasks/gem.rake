@@ -12,7 +12,7 @@ spec = Gem::Specification.new do |s|
   s.email = "fmmfonseca@gmail.com"
 
   s.required_ruby_version = ">= 1.8.6"
-  s.files = FileList["LICENSE", "Rakefile", "README.rdoc", "tasks/*.rake", "lib/**/*.rb", "test/tc_*.rb"].to_a
+  s.files = FileList["LICENSE", "Rakefile", "README.rdoc", "tasks/test.rake", "lib/**/*.rb", "test/tc_*.rb"].to_a
   s.test_files = Dir.glob("test/tc_*.rb")
   s.has_rdoc = true
   s.extra_rdoc_files = %w[README.rdoc LICENSE]
