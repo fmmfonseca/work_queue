@@ -23,7 +23,8 @@ module Rake
   #
   # To avoid hard-coding the connection configuration into the source code, the task can obtain that data from a YAML file.
   #
-  #  Rake::FTPTask.new("ftp.yml") do |t|
+  #  Rake::FTPTask.new do |t|
+  #   t.config_file = "ftp.yml"
   #   t.path = "public_html/"
   #   t.upload_files = FileList["doc/**/*"].to_a
   #  end
@@ -35,6 +36,16 @@ module Rake
   #  path = public_html/
   #
   class FTPTask < TaskLib
+
+    ##
+    # The name of the main, top level task (default is :ftp).
+    #
+    attr_accessor :name
+    
+    ##
+    # The file containing the connection configuration (default is nil).
+    #
+    attr_accessor :config_file
 
     ##
     # The address of the server (default is nil).
@@ -67,9 +78,11 @@ module Rake
     attr_accessor :verbose
 
     ##
-    # Creates a new FTP task.
+    # Creates a new FTP task with the given name.
     #
-    def initialize(config_file=nil)
+    def initialize(name=:ftp)
+      @name = name
+      @config_file = nil
       @host = nil
       @user_name = "anonymous"
       @password = nil
@@ -78,7 +91,6 @@ module Rake
       @verbose = false
       @ftp = nil
       @history = {}
-      load_config(config_file) unless config_file.nil?
       yield self if block_given?
       define
     end
@@ -88,7 +100,7 @@ module Rake
     #
     def define
 
-      namespace :ftp do
+      namespace @name do
         desc "Upload files to an FTP account"
         task(:upload) do
           connect
@@ -104,8 +116,8 @@ module Rake
     ##
     # Reads configuration values from a YAML file.
     #
-    def load_config(file)
-      config = YAML::load_file(file)
+    def load_config
+      config = YAML::load_file(@config_file)
       @host = config["host"] || @host
       @user_name = config["user_name"] || @user_name
       @password = config["password"] || @password
@@ -116,6 +128,7 @@ module Rake
     # Establishes the FTP connection.
     #
     def connect
+      load_config unless @config_file.nil?
       @ftp = Net::FTP.new(@host, @user_name, @password)
       puts "Connected to #{@host}" if @verbose
       puts "Using #{@ftp.binary ? "binary" : "text"} mode to transfer files" if @verbose
@@ -175,7 +188,8 @@ module Rake
 
 end
 
-Rake::FTPTask.new("config/ftp.yml") do |ftp|
+Rake::FTPTask.new do |ftp|
+  ftp.config_file = "config/ftp.yml"
   ftp.upload_files = FileList["doc/**/*"].to_a
   ftp.verbose = true
 end
