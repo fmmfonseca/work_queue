@@ -10,13 +10,4 @@ namespace(:test) do
     t.warning = true
   end
 
-  desc "Run tests on multiple ruby versions"
-  task(:compatibility) do
-    versions = %w[1.8.6 1.8.7 1.9.1 jruby]
-    system <<-CMD
-  bash -c 'source ~/.rvm/scripts/rvm;
-       rvm #{versions.join(',')} rake test:unit'
-    CMD
-  end
-
 end
