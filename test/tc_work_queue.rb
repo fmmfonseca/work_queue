@@ -37,6 +37,28 @@ class TC_WorkQueue < Test::Unit::TestCase
     wq.join
     assert_equal(s, "Hello #2")
   end
+  
+  def test_inner_enqueue
+    s = String.new
+    wq = WorkQueue.new
+    wq.enqueue_b do
+      sleep 0.01
+      wq.enqueue_b(s) { |str| str.replace("Hello #1")  }
+      sleep 0.01
+    end
+    wq.join
+    assert_equal(s, "Hello #1")
+  end
+  
+  def test_threads_recycle
+    wq = WorkQueue.new
+    wq.enqueue_b { sleep 0.01 }
+    sleep 0.02
+    assert_equal(wq.cur_threads, 1)
+    wq.enqueue_b { sleep 0.01 }
+    assert_equal(wq.cur_threads, 1)
+    wq.join
+  end
 
   def test_max_threads
     assert_raise(ArgumentError) { WorkQueue.new(0) }
@@ -64,21 +86,10 @@ class TC_WorkQueue < Test::Unit::TestCase
     wq.join
   end
 
-  def test_keep_alive
-    assert_raise(ArgumentError) { WorkQueue.new(nil,nil,0) }
-    assert_raise(ArgumentError) { WorkQueue.new(nil,nil,-1) }
-    wq = WorkQueue.new(1,1,0.01)
-    wq.enqueue_b { sleep(0.01) }
-    assert_equal(wq.cur_threads, 1)
-    sleep(0.1)
-    assert_equal(wq.cur_threads, 0)
-    wq.join
-  end
-
   def test_stress
     a = []
     m = Mutex.new
-    wq = WorkQueue.new(100,200,0.1)
+    wq = WorkQueue.new(100,200)
     (1..1000).each do
       wq.enqueue_b(a,m) { |str,mut|
         sleep(0.01)

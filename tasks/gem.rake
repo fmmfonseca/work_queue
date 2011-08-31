@@ -1,8 +1,8 @@
-require 'rake/gempackagetask'
+require 'rubygems/package_task'
 
 CLEAN.include("pkg")
 
-# For a list of all attributes refer to http://docs.rubygems.org/read/chapter/20
+# For a list of all attributes refer to http://rubygems.rubyforge.org/rubygems-update/Gem/Specification.html
 spec = Gem::Specification.new do |s|
   s.name = "work_queue"
   s.version = WorkQueue::VERSION
@@ -19,7 +19,7 @@ spec = Gem::Specification.new do |s|
   s.rdoc_options = %w[--line-numbers --inline-source --main README.rdoc]
 end
 
-# For a list of all attributes refer to http://rake.rubyforge.org/classes/Rake/PackageTask.html
-Rake::GemPackageTask.new(spec) do |p|
+# For a list of all attributes refer to http://rubygems.rubyforge.org/rubygems-update/Gem/PackageTask.html
+Gem::PackageTask.new(spec) do |p|
   p.need_zip = true
 end
