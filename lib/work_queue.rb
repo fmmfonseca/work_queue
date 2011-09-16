@@ -6,7 +6,7 @@
 # This file contains an implementation of a work queue structure.
 #
 # == Version
-# 2.0.0.beta
+# 2.0.0
 #
 # == Author
 # Miguel Fonseca <fmmfonseca@gmail.com>
@@ -34,7 +34,7 @@ require 'monitor'
 #
 class WorkQueue
     
-    VERSION = "2.0.0.beta"
+    VERSION = "2.0.0"
     
     ##
     # Creates a new work queue with the desired parameters.
