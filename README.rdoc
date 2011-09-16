@@ -4,7 +4,7 @@ A work queue is designed to coordinate work between a producer and a pool of wor
 When some task needs to be performed, the producer adds an object containing the task routine to the work queue.
 If the work queue is full, the producer will block until a worker thread removes an object from the queue.
 Eventually, one of the worker threads removes the object from the work queue and executes the routine.
-If the work queue is empty, a worker thread will block until an object is made available by the producer or until the keep-alive time expires.
+If the work queue is empty, a worker thread will block until an object is made available by the producer.
 
 Work queues are useful for several reasons:
 * To easily perform tasks asynchronously and concurrently in your application;
@@ -32,5 +32,3 @@ Note that you generally want to bound the resources used:
   WorkQueue.new(10)
   # Limit the maximum number of queued tasks
   WorkQueue.new(nil,20)
-  # Limit the maximum time to preserve idle worker threads
-  WorkQueue.new(nil,nil,10)
