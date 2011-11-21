@@ -34,7 +34,7 @@ require 'monitor'
 #
 class WorkQueue
     
-    VERSION = "2.0.0"
+    VERSION = "2.0.1"
     
     ##
     # Creates a new work queue with the desired parameters.
@@ -150,13 +150,11 @@ class WorkQueue
     #  wq.kill
     #
     def kill
-        @tasks.synchronize do
-            @threads.dup.each { |thread| thread.exit.join }
-            @threds.clear
-            @threads_waiting = 0
-            @tasks.clear
-            @cur_tasks = 0
-        end
+        @threads.dup.each { |thread| thread.exit.join }
+        @threads.clear
+        @threads_waiting = 0
+        @tasks.clear
+        @cur_tasks = 0
     end
     
     private

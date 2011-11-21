@@ -100,4 +100,12 @@ class TC_WorkQueue < Test::Unit::TestCase
     assert_equal(a.size, 1000)
   end
 
+  def test_kill
+    s = String.new
+    wq = WorkQueue.new
+    wq.enqueue_b(s) { |str| sleep 0.1; str.replace("Hello")  }
+    wq.kill
+    assert_equal(s, "")
+  end
+
 end
