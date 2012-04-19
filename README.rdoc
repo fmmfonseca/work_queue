@@ -10,7 +10,8 @@ Work queues are useful for several reasons:
 * To easily perform tasks asynchronously and concurrently in your application;
 * To let you focus on the work you actually want to perform without having to worry about the thread creation and management;
 * To minimize overhead, by reusing previously constructed threads rather than creating new ones;
-* To bound resource use, by setting a limit on the maximum number of simultaneously executing threads;
+* To bound the resources used, by setting a limit on the maximum number of simultaneously executing threads;
+
 
 = Usage
 
@@ -26,9 +27,36 @@ Run the code:
   wq.enqueue_b { puts "Hello from the WorkQueue" }
   wq.join
 
-Note that you generally want to bound the resources used:
+It's generally recommended to bound the resources used:
 
   # Limit the maximum number of simultaneous worker threads
-  WorkQueue.new(10)
+  WorkQueue.new 10, nil
   # Limit the maximum number of queued tasks
-  WorkQueue.new(nil,20)
+  WorkQueue.new nil, 20
+
+
+= Example(s)
+
+Download multiple files in parallel: 
+
+  require 'open-uri'
+  require 'rubygems'
+  require 'work_queue'
+
+  wq = WorkQueue.new 5
+
+  (1..6605).each do |number|
+	  wq.enqueue_b do
+		  open("rfc#{number}.txt", "wb") do |file|
+		  file.write open("http://www.rfc-editor.org/rfc/rfc#{number}.txt").read
+			  puts "rfc#{number} downloaded"
+		  end
+	  end
+  end
+
+  wq.join
+
+
+= License
+
+Released under the MIT license.

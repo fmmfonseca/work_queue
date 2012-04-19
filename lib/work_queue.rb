@@ -1,3 +1,6 @@
+require 'thread'
+require 'monitor'
+
 ##
 # = Name
 # WorkQueue
@@ -6,231 +9,259 @@
 # This file contains an implementation of a work queue structure.
 #
 # == Version
-# 2.0.0
+# 2.5.0
 #
 # == Author
-# Miguel Fonseca <fmmfonseca@gmail.com>
+# Miguel Fonseca <contact@miguelfonseca.com>
 #
 # == Copyright
-# Copyright 2009-2011 Miguel Fonseca
+# Copyright 2012 Miguel Fonseca
 #
 # == License
 # MIT (see LICENSE file)
 #
 
-require 'thread'
-require 'monitor'
-
-##
-# = WorkQueue
-#
-# == Description
-# A tunable work queue, designed to coordinate work between a producer and a pool of worker threads.
-#
-# == Usage
-#  wq = WorkQueue.new
-#  wq.enqueue_b { puts "Hello from the WorkQueue" }
-#  wq.join
-#
 class WorkQueue
-    
-    VERSION = "2.0.1"
-    
-    ##
-    # Creates a new work queue with the desired parameters.
-    #
-    #  wq = WorkQueue.new(5,10,20)
-    #
-    def initialize(max_threads=nil, max_tasks=nil)
-        self.max_threads = max_threads
-        self.max_tasks = max_tasks
-        @threads = Array.new
-        @threads.extend(MonitorMixin)
-        @threads_waiting = 0
-        @tasks = Array.new
-        @tasks.extend(MonitorMixin)
-        @task_enqueued = @tasks.new_cond
-        @task_completed = @tasks.new_cond
-        @cur_tasks = 0
+  VERSION = "2.5.0"
+
+  ##
+  # Creates a new work queue with the desired parameters.
+  # It's generally recommended to bound the resources used.
+  #
+  # ==== Parameter(s)
+  # * +max_threads+ - Maximum number of worker threads.
+  # * +max_tasks+ - Maximum number of queued tasks.
+  #
+  # ==== Example(s)
+  #  wq = WorkQueue.new 10, nil
+  #  wq = WorkQueue.new nil, 20
+  #  wq = WorkQueue.new 10, 20
+  #
+  def initialize(max_threads=nil, max_tasks=nil)
+    self.max_threads = max_threads
+    self.max_tasks = max_tasks
+    @threads = Array.new
+    @threads_waiting = 0
+    @threads.extend MonitorMixin
+    @tasks = Array.new
+    @tasks.extend MonitorMixin
+    @task_enqueued = @tasks.new_cond
+    @task_dequeued = @tasks.new_cond
+    @task_completed = @tasks.new_cond
+    @tasks_pending = 0
+  end
+
+  ##
+  # Returns the maximum number of worker threads.
+  # This value is set upon initialization and cannot be changed afterwards.
+  #
+  # ==== Example(s)
+  #  wq = WorkQueue.new
+  #  wq.max_threads		#=> Infinity
+  #  wq = WorkQueue.new 1, nil
+  #  wq.max_threads		#=> 1
+  #
+  def max_threads
+    @max_threads
+  end
+
+  ##
+  # Returns the current number of worker threads.
+  # This value is just a snapshot, and may change immediately upon returning.
+  #
+  # ==== Example(s)
+  #  wq = WorkQueue.new 1
+  #  wq.cur_threads		#=> 0
+  #  wq.enqueue_b { ... }
+  #  wq.cur_threads		#=> 1
+  #
+  def cur_threads
+    @threads.size
+  end
+
+  ##
+  # Returns the maximum number of queued tasks.
+  # This value is set upon initialization and cannot be changed afterwards.
+  #
+  # ==== Example(s)
+  #  wq = WorkQueue.new
+  #  wq.max_tasks		#=> Infinity
+  #  wq = WorkQueue.new nil, 1
+  #  wq.max_tasks		#=> 1
+  #
+  def max_tasks
+    @max_tasks
+  end
+
+  ##
+  # Returns the current number of queued tasks.
+  # This value is just a snapshot, and may change immediately upon returning.
+  #
+  # ==== Example(s)
+  #  wq = WorkQueue.new 1
+  #  wq.enqueue_b { ... }
+  #  wq.cur_tasks		#=> 0
+  #  wq.enqueue_b { ... }
+  #  wq.cur_tasks		#=> 1
+  #
+  def cur_tasks
+    @tasks.size
+  end
+
+  ##
+  # Schedules the given Block for future execution by a worker thread.
+  # If there is no space left in the queue, waits until space becomes available.
+  #
+  # ==== Parameter(s)
+  # * +params+ - Parameters passed to the given block.
+  #
+  # ==== Example(s)
+  #  wq = WorkQueue.new
+  #  wq.enqueue_b("Parameter") { |obj| ... }
+  #
+  def enqueue_b(*params, &block)
+    enqueue block, params
+  end
+
+  ##
+  # Schedules the given Proc for future execution by a worker thread.
+  # If there is no space left in the queue, waits until space becomes available.
+  #
+  # ==== Parameter(s)
+  # * +proc+ - Proc to be executed.
+  # * +params+ - Parameters passed to the given proc.
+  #
+  # ==== Example(s)
+  #  wq = WorkQueue.new
+  #  wq.enqueue_p(Proc.new { |obj| ... }, "Parameter")
+  #
+  def enqueue_p(proc, *params)
+    enqueue proc, params
+  end
+
+  ##
+  # Waits until the tasks queue is empty and all worker threads have finished.
+  #
+  # ==== Example(s)
+  #  wq = WorkQueue.new
+  #  wq.enqueue_b { ... }
+  #  wq.join
+  #
+  def join
+    @tasks.synchronize do
+      @task_completed.wait_while { @tasks_pending > 0 }
     end
-    
-    ##
-    # Returns the maximum number of worker threads.
-    # This value is set upon initialization and cannot be changed afterwards.
-    #
-    #  wq = WorkQueue.new()
-    #  wq.max_threads		#=> Infinity
-    #  wq = WorkQueue.new(1)
-    #  wq.max_threads		#=> 1
-    #
-    def max_threads
-        @max_threads
-    end
-    
-    ##
-    # Returns the current number of worker threads.
-    # This value is just a snapshot, and may change immediately upon returning.
-    #
-    #  wq = WorkQueue.new(10)
-    #  wq.cur_threads		#=> 0
-    #  wq.enqueue_b {}
-    #  wq.cur_threads		#=> 1
-    #
-    def cur_threads
-        @threads.size
-    end
-    
-    ##
-    # Returns the maximum number of queued tasks.
-    # This value is set upon initialization and cannot be changed afterwards.
-    #
-    #  wq = WorkQueue.new()
-    #  wq.max_tasks		#=> Infinity
-    #  wq = WorkQueue.new(nil,1)
-    #  wq.max_tasks		#=> 1
-    #
-    def max_tasks
-        @max_tasks
-    end
-    
-    ##
-    # Returns the current number of active tasks.
-    # This value is just a snapshot, and may change immediately upon returning.
-    #
-    #  wq = WorkQueue.new(1)
-    #  wq.enqueue_b { sleep(1) }
-    #  wq.cur_tasks		#=> 0
-    #  wq.enqueue_b {}
-    #  wq.cur_tasks		#=> 1
-    #
-    def cur_tasks
-        @cur_tasks
-    end
-    
-    ##
-    # Schedules the given Proc for future execution by a worker thread.
-    # If there is no space left in the queue, waits until space becomes available.
-    #
-    #  wq = WorkQueue.new(1)
-    #  wq.enqueue_p(Proc.new {})
-    #
-    def enqueue_p(proc, *args)
-        enqueue(proc, args) 
-    end
-    
-    ##
-    # Schedules the given Block for future execution by a worker thread.
-    # If there is no space left in the queue, waits until space becomes available.
-    #
-    #  wq = WorkQueue.new(1)
-    #  wq.enqueue_b {}
-    #
-    def enqueue_b(*args, &block)
-       enqueue(block, args) 
-    end
-    
-    ##
-    # Waits until the tasks queue is empty and all worker threads have finished.
-    #
-    #  wq = WorkQueue.new(1)
-    #  wq.enqueue_b { sleep(1) }
-    #  wq.join
-    #
-    def join
-        @tasks.synchronize do
-            @task_completed.wait_while { cur_tasks > 0 }
-        end
-    end
-    
-    ##
-    # Stops all worker threads immediately, aborting any ongoing tasks.
-    #
-    #  wq = WorkQueue.new(1)
-    #  wq.enqueue_b { sleep(1) }
-    #  wq.kill
-    #
-    def kill
-        @threads.dup.each { |thread| thread.exit.join }
+  end
+
+  ##
+  # Halt all worker threads immediately, aborting any ongoing tasks.
+  # Resets all 
+  #
+  # ==== Example(s)
+  #  wq = WorkQueue.new
+  #  wq.enqueue_b { ... }
+  #  wq.kill
+  #
+  def kill
+    @tasks.synchronize do
+      @threads.synchronize do
+        @threads.each { |thread| thread.exit }
         @threads.clear
         @threads_waiting = 0
-        @tasks.clear
-        @cur_tasks = 0
+      end
+      @tasks.clear
+      @tasks_pending = 0
+      @task_dequeued.broadcast
+      @task_completed.broadcast
     end
-    
-    private
-    
-    ##
-    # Generic
-    #
-    def enqueue(proc, args)
-        @tasks.synchronize do
-            @task_completed.wait_while { cur_tasks >= max_tasks }
-            @tasks << [proc, args]
-            @cur_tasks += 1
-            @task_enqueued.signal
-            spawn_thread
+  end
+
+  private
+
+  ##
+  # Sets the maximum number of worker threads.
+  #
+  def max_threads=(value)
+    raise ArgumentError, "the maximum number of threads must be positive" if value and value <= 0
+    @max_threads = value || 1.0/0
+  end
+
+  ##
+  # Sets the maximum number of queued tasks.
+  #
+  def max_tasks=(value)
+    raise ArgumentError, "the maximum number of tasks must be positive" if value and value <= 0
+    @max_tasks = value || 1.0/0
+  end
+
+  ##
+  # Schedules the given Proc for future execution by a worker thread.
+  #
+  def enqueue(proc, params)
+    @tasks.synchronize do
+      @task_dequeued.wait_until { @tasks.size < @max_tasks }
+      @tasks << [proc, params]
+      @tasks_pending += 1
+      @task_enqueued.signal
+    end
+    spawn_thread
+  end
+
+  ##
+  # Enrolls a new worker thread. The request is only carried out if necessary.
+  #
+  def spawn_thread
+    @tasks.synchronize do
+      @threads.synchronize do
+        if @threads.size < @max_threads && @threads_waiting <= 0 && @tasks.size > 0
+          @threads << Thread.new { run }
         end
+      end
     end
-    
-    ##
-    # Sets the maximum number of worker threads.
-    #
-    def max_threads=(value)
-        raise ArgumentError, "the maximum number of threads must be positive" if value and value <= 0
-        @max_threads = value || 1.0/0
-    end
-    
-    ##
-    # Sets the maximum number of queued tasks.
-    #
-    def max_tasks=(value)
-        raise ArgumentError, "the maximum number of tasks must be positive" if value and value <= 0
-        @max_tasks = value || 1.0/0
-    end
-    
-    ##
-    # Enrolls a new worker thread.
-    # The request is only carried out if necessary.
-    #
-    def spawn_thread
-        @threads.synchronize do
-            if cur_threads < max_threads and @threads_waiting <= 0 and @tasks.size > 0
-                @threads << Thread.new do
-                    begin
-                        work
-                    ensure
-                        @threads.synchronize do
-                            @threads.delete(Thread.current)
-                        end
-                    end
-                end
-            end
+  end
+
+  ##
+  # Repeatedly process the tasks queue.
+  #
+  def run
+    begin
+      loop do
+        proc, params = dequeue
+        begin
+          proc.call(*params)
+        rescue Exception => e
+          # Suppress Exception
         end
+        conclude
+      end
+    ensure
+      @threads.synchronize do
+        @threads.delete Thread.current
+      end
     end
-    
-    
-    ##
-    # Repeatedly process the tasks queue.
-    #
-    def work
-       loop do 
-            begin
-                proc, args = @tasks.synchronize do
-                    @threads_waiting += 1
-                    @task_enqueued.wait_while { @tasks.size <= 0 }
-                    @threads_waiting -= 1
-                    @tasks.shift
-                end
-                proc.call(*args)
-            rescue Exception => e
-                # Suppress Exception
-            ensure
-                @tasks.synchronize do
-                    @cur_tasks -= 1
-                    @task_completed.broadcast
-                end
-            end
-       end
+  end
+
+  ##
+  # Retrieves a task from the queue.
+  #
+  def dequeue
+    @tasks.synchronize do
+      @threads_waiting += 1
+      @task_enqueued.wait_while { @tasks.empty? }
+      @threads_waiting -= 1
+      task = @tasks.shift
+      @task_dequeued.signal
+      return task
     end
-    
+  end
+
+  ##
+  # Wind up a task execution.
+  #
+  def conclude
+    @tasks.synchronize do
+      @tasks_pending -= 1
+      @task_completed.signal
+    end
+  end
 end
