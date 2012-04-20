@@ -46,12 +46,12 @@ Download multiple files in parallel:
   wq = WorkQueue.new 5
 
   (1..6605).each do |number|
-	  wq.enqueue_b do
-		  open("rfc#{number}.txt", "wb") do |file|
-		  file.write open("http://www.rfc-editor.org/rfc/rfc#{number}.txt").read
-			  puts "rfc#{number} downloaded"
-		  end
-	  end
+    wq.enqueue_b do
+      open("rfc#{number}.txt", "wb") do |file|
+        file.write open("http://www.rfc-editor.org/rfc/rfc#{number}.txt").read
+        puts "rfc#{number} downloaded"
+      end
+    end
   end
 
   wq.join

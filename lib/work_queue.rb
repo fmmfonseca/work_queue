@@ -9,7 +9,7 @@ require 'monitor'
 # This file contains an implementation of a work queue structure.
 #
 # == Version
-# 2.5.0
+# 2.5.1
 #
 # == Author
 # Miguel Fonseca <contact@miguelfonseca.com>
@@ -22,7 +22,7 @@ require 'monitor'
 #
 
 class WorkQueue
-  VERSION = "2.5.0"
+  VERSION = "2.5.1"
 
   ##
   # Creates a new work queue with the desired parameters.
