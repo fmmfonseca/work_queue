@@ -2,30 +2,13 @@ require 'thread'
 require 'monitor'
 
 ##
-# = Name
-# WorkQueue
+# A tunable work queue, designed to coordinate work between a producer and a pool of worker threads.
 #
-# == Description
-# This file contains an implementation of a work queue structure.
-#
-# == Version
-# 2.5.1
-#
-# == Author
-# Miguel Fonseca <contact@miguelfonseca.com>
-#
-# == Copyright
-# Copyright 2012 Miguel Fonseca
-#
-# == License
-# MIT (see LICENSE file)
-#
-
 class WorkQueue
-  VERSION = "2.5.1"
+  VERSION = "2.5.2"
 
   ##
-  # Creates a new work queue with the desired parameters.
+  # Creates an empty work queue with the desired parameters.
   # It's generally recommended to bound the resources used.
   #
   # ==== Parameter(s)

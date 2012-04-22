@@ -1,19 +1,3 @@
-##
-# = Name
-# TC_WorkQueue
-#
-# == Description
-# This file contains unit tests for the WorkQueue class.
-#
-# == Author
-# Miguel Fonseca <contact@miguelfonseca.com>
-#
-# == Copyright
-# Copyright 2012 Miguel Fonseca
-#
-# == License
-# MIT (see LICENSE file)
-
 require 'test/unit'
 require 'lib/work_queue'
 
