@@ -185,7 +185,7 @@ class WorkQueue
       @task_dequeued.wait_until { @tasks.size < @max_tasks }
       @tasks << [proc, params]
       @tasks_pending += 1
-      @task_enqueued.signal
+      @task_enqueued.broadcast
     end
     spawn_thread
   end
@@ -233,7 +233,7 @@ class WorkQueue
       @task_enqueued.wait_while { @tasks.empty? }
       @threads_waiting -= 1
       task = @tasks.shift
-      @task_dequeued.signal
+      @task_dequeued.broadcast
       return task
     end
   end
@@ -244,7 +244,7 @@ class WorkQueue
   def conclude
     @tasks.synchronize do
       @tasks_pending -= 1
-      @task_completed.signal
+      @task_completed.broadcast
     end
   end
 end
