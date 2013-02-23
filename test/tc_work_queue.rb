@@ -9,7 +9,7 @@ class TC_WorkQueue < Test::Unit::TestCase
     wq.join
     assert_equal "Hello Proc", s
   end
-  
+
   def test_enqueue_block
     s = String.new
     wq = WorkQueue.new
@@ -17,7 +17,7 @@ class TC_WorkQueue < Test::Unit::TestCase
     wq.join
     assert_equal "Hello Block", s
   end
-  
+
   def test_inner_enqueue
     s = String.new
     wq = WorkQueue.new
@@ -27,9 +27,9 @@ class TC_WorkQueue < Test::Unit::TestCase
       sleep 0.01
     end
     wq.join
-    assert_equal "Hello Inner", s 
+    assert_equal "Hello Inner", s
   end
-  
+
   def test_threads_recycle
     wq = WorkQueue.new
     wq.enqueue_b { sleep 0.01 }
@@ -51,7 +51,7 @@ class TC_WorkQueue < Test::Unit::TestCase
     assert_equal 1, wq.cur_threads
     wq.join
   end
-  
+
   def test_max_threads_validation
     assert_raise(ArgumentError) { WorkQueue.new 0, nil }
     assert_raise(ArgumentError) { WorkQueue.new -1, nil }
@@ -66,7 +66,7 @@ class TC_WorkQueue < Test::Unit::TestCase
     assert_equal 1, wq.cur_tasks
     wq.join
   end
-  
+
   def test_max_tasks_validation
     assert_raise(ArgumentError) { WorkQueue.new nil, 0 }
     assert_raise(ArgumentError) { WorkQueue.new nil, -1 }
@@ -85,7 +85,7 @@ class TC_WorkQueue < Test::Unit::TestCase
     wq.join
     assert_equal 10000, i
   end
-  
+
   def test_stress_prolonged
     i = 0
     m = Mutex.new
@@ -103,7 +103,7 @@ class TC_WorkQueue < Test::Unit::TestCase
   def test_kill
     s = String.new
     wq = WorkQueue.new
-    wq.enqueue_b(s) { |str| 
+    wq.enqueue_b(s) { |str|
       sleep 0.1
       str.replace "Hello"
     }

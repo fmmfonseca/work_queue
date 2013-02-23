@@ -138,7 +138,7 @@ class WorkQueue
 
   ##
   # Halt all worker threads immediately, aborting any ongoing tasks.
-  # Resets all 
+  # Resets all
   #
   # ==== Example(s)
   #  wq = WorkQueue.new

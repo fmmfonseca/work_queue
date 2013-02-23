@@ -37,7 +37,7 @@ It's generally recommended to bound the resources used:
 
 = Example(s)
 
-Download multiple files in parallel: 
+Download multiple files in parallel:
 
   require 'open-uri'
   require 'rubygems'
