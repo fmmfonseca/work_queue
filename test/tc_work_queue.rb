@@ -1,5 +1,5 @@
 require 'test/unit'
-require 'lib/work_queue'
+require_relative '../lib/work_queue'
 
 class TC_WorkQueue < Test::Unit::TestCase
   def test_enqueue_proc
