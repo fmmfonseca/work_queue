@@ -2,7 +2,7 @@ require "rubygems/package_task"
 
 CLEAN.include("pkg")
 
-# For a list of all attributes refer to http://rubygems.rubyforge.org/rubygems-update/Gem/Specification.html
+# For a list of all attributes refer to http://docs.seattlerb.org/rubygems/Gem/Specification.html
 spec = Gem::Specification.new do |s|
   s.name = "work_queue"
   s.version = WorkQueue::VERSION
@@ -19,7 +19,7 @@ spec = Gem::Specification.new do |s|
   s.rdoc_options = %w(--line-numbers --inline-source --main README.rdoc)
 end
 
-# For a list of all attributes refer to http://rubygems.rubyforge.org/rubygems-update/Gem/PackageTask.html
+# For a list of all attributes refer to http://docs.seattlerb.org/rubygems/Gem/PackageTask.html
 Gem::PackageTask.new(spec) do |t|
   t.need_zip = true
 end
