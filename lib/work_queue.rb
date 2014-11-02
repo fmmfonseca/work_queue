@@ -5,7 +5,7 @@ require "monitor"
 # A tunable work queue, designed to coordinate work between a producer and a pool of worker threads.
 #
 class WorkQueue
-  VERSION = "2.5.3"
+  VERSION = "2.5.4"
 
   ##
   # Creates an empty work queue with the desired parameters.

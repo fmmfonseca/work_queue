@@ -12,7 +12,7 @@ spec = Gem::Specification.new do |s|
   s.email = "contact@miguelfonseca.com"
   s.license = "MIT"
 
-  s.required_ruby_version = ">= 1.8.7"
+  s.required_ruby_version = ">= 1.9.3"
   s.files = FileList["LICENSE", "Rakefile", "README.rdoc", "tasks/test.rake", "lib/**/*.rb", "test/tc_*.rb"].to_a
   s.test_files = Dir.glob("test/tc_*.rb")
   s.has_rdoc = true
