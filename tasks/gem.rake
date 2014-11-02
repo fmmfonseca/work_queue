@@ -10,6 +10,7 @@ spec = Gem::Specification.new do |s|
   s.homepage = "http://github.com/fmmfonseca/work_queue"
   s.author = "Miguel Fonseca"
   s.email = "contact@miguelfonseca.com"
+  s.license = "MIT"
 
   s.required_ruby_version = ">= 1.8.7"
   s.files = FileList["LICENSE", "Rakefile", "README.rdoc", "tasks/test.rake", "lib/**/*.rb", "test/tc_*.rb"].to_a
