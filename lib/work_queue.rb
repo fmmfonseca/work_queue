@@ -1,5 +1,5 @@
-require 'thread'
-require 'monitor'
+require "thread"
+require "monitor"
 
 ##
 # A tunable work queue, designed to coordinate work between a producer and a pool of worker threads.
@@ -20,13 +20,13 @@ class WorkQueue
   #  wq = WorkQueue.new nil, 20
   #  wq = WorkQueue.new 10, 20
   #
-  def initialize(max_threads=nil, max_tasks=nil)
+  def initialize(max_threads = nil, max_tasks = nil)
     self.max_threads = max_threads
     self.max_tasks = max_tasks
-    @threads = Array.new
+    @threads = []
     @threads_waiting = 0
     @threads.extend MonitorMixin
-    @tasks = Array.new
+    @tasks = []
     @tasks.extend MonitorMixin
     @task_enqueued = @tasks.new_cond
     @task_dequeued = @tasks.new_cond
@@ -148,7 +148,7 @@ class WorkQueue
   def kill
     @tasks.synchronize do
       @threads.synchronize do
-        @threads.each { |thread| thread.exit }
+        @threads.each(&:exit)
         @threads.clear
         @threads_waiting = 0
       end
@@ -165,16 +165,16 @@ class WorkQueue
   # Sets the maximum number of worker threads.
   #
   def max_threads=(value)
-    raise ArgumentError, "the maximum number of threads must be positive" if value and value <= 0
-    @max_threads = value || 1.0/0
+    fail ArgumentError, "the maximum number of threads must be positive" if value && value <= 0
+    @max_threads = value || 1.0 / 0
   end
 
   ##
   # Sets the maximum number of queued tasks.
   #
   def max_tasks=(value)
-    raise ArgumentError, "the maximum number of tasks must be positive" if value and value <= 0
-    @max_tasks = value || 1.0/0
+    fail ArgumentError, "the maximum number of tasks must be positive" if value && value <= 0
+    @max_tasks = value || 1.0 / 0
   end
 
   ##
@@ -207,20 +207,18 @@ class WorkQueue
   # Repeatedly process the tasks queue.
   #
   def run
-    begin
-      loop do
-        proc, params = dequeue
-        begin
-          proc.call(*params)
-        rescue Exception => e
-          # Suppress Exception
-        end
-        conclude
+    loop do
+      proc, params = dequeue
+      begin
+        proc.call(*params)
+      rescue => e
+        STDERR.puts e
       end
-    ensure
-      @threads.synchronize do
-        @threads.delete Thread.current
-      end
+      conclude
+    end
+  ensure
+    @threads.synchronize do
+      @threads.delete Thread.current
     end
   end
 

@@ -1,17 +1,17 @@
-require 'test/unit'
-require_relative '../lib/work_queue'
+require "test/unit"
+require_relative "../lib/work_queue"
 
-class TC_WorkQueue < Test::Unit::TestCase
+class TestWorkQueue < Test::Unit::TestCase
   def test_enqueue_proc
-    s = String.new
+    s = ""
     wq = WorkQueue.new
-    wq.enqueue_p(Proc.new { |str| str.replace "Hello Proc" }, s)
+    wq.enqueue_p(proc { |str| str.replace "Hello Proc" }, s)
     wq.join
     assert_equal "Hello Proc", s
   end
 
   def test_enqueue_block
-    s = String.new
+    s = ""
     wq = WorkQueue.new
     wq.enqueue_b(s) { |str| str.replace "Hello Block" }
     wq.join
@@ -19,7 +19,7 @@ class TC_WorkQueue < Test::Unit::TestCase
   end
 
   def test_inner_enqueue
-    s = String.new
+    s = ""
     wq = WorkQueue.new
     wq.enqueue_b do
       sleep 0.01
@@ -41,7 +41,7 @@ class TC_WorkQueue < Test::Unit::TestCase
   end
 
   def test_max_threads
-    wq = WorkQueue.new 1
+    wq = WorkQueue.new(1)
     assert_equal 0, wq.cur_threads
     wq.enqueue_b { sleep 0.01 }
     assert_equal 1, wq.cur_threads
@@ -53,12 +53,12 @@ class TC_WorkQueue < Test::Unit::TestCase
   end
 
   def test_max_threads_validation
-    assert_raise(ArgumentError) { WorkQueue.new 0, nil }
-    assert_raise(ArgumentError) { WorkQueue.new -1, nil }
+    assert_raise(ArgumentError) { WorkQueue.new(0, nil) }
+    assert_raise(ArgumentError) { WorkQueue.new(-1, nil) }
   end
 
   def test_max_tasks
-    wq = WorkQueue.new 1, 1
+    wq = WorkQueue.new(1, 1)
     wq.enqueue_b { sleep 0.01 }
     wq.enqueue_b { sleep 0.01 }
     assert_equal 1, wq.cur_tasks
@@ -68,45 +68,45 @@ class TC_WorkQueue < Test::Unit::TestCase
   end
 
   def test_max_tasks_validation
-    assert_raise(ArgumentError) { WorkQueue.new nil, 0 }
-    assert_raise(ArgumentError) { WorkQueue.new nil, -1 }
+    assert_raise(ArgumentError) { WorkQueue.new(nil, 0) }
+    assert_raise(ArgumentError) { WorkQueue.new(nil, -1) }
   end
 
   def test_stress
     i = 0
     m = Mutex.new
-    wq = WorkQueue.new 100, 200
-    (1..10000).each do
-      wq.enqueue_b {
+    wq = WorkQueue.new(100, 200)
+    (1..10_000).each do
+      wq.enqueue_b do
         sleep 0.01
         m.synchronize { i += 1 }
-      }
+      end
     end
     wq.join
-    assert_equal 10000, i
+    assert_equal 10_000, i
   end
 
   def test_stress_prolonged
     i = 0
     m = Mutex.new
-    wq = WorkQueue.new 100, 200
-    (1..10000).each do
-      wq.enqueue_b {
+    wq = WorkQueue.new(100, 200)
+    (1..10_000).each do
+      wq.enqueue_b do
         sleep rand(5)
         m.synchronize { i += 1 }
-      }
+      end
     end
     wq.join
-    assert_equal 10000, i
+    assert_equal 10_000, i
   end
 
   def test_kill
-    s = String.new
+    s = ""
     wq = WorkQueue.new
-    wq.enqueue_b(s) { |str|
+    wq.enqueue_b(s) do |str|
       sleep 0.1
       str.replace "Hello"
-    }
+    end
     wq.kill
     assert(s.empty?)
   end

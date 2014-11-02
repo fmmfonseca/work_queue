@@ -1,4 +1,4 @@
-require 'rubygems/package_task'
+require "rubygems/package_task"
 
 CLEAN.include("pkg")
 
@@ -15,8 +15,8 @@ spec = Gem::Specification.new do |s|
   s.files = FileList["LICENSE", "Rakefile", "README.rdoc", "tasks/test.rake", "lib/**/*.rb", "test/tc_*.rb"].to_a
   s.test_files = Dir.glob("test/tc_*.rb")
   s.has_rdoc = true
-  s.extra_rdoc_files = %w[README.rdoc LICENSE]
-  s.rdoc_options = %w[--line-numbers --inline-source --main README.rdoc]
+  s.extra_rdoc_files = %w(README.rdoc LICENSE)
+  s.rdoc_options = %w(--line-numbers --inline-source --main README.rdoc)
 end
 
 # For a list of all attributes refer to http://rubygems.rubyforge.org/rubygems-update/Gem/PackageTask.html

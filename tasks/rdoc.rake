@@ -1,4 +1,4 @@
-require 'rdoc/task'
+require "rdoc/task"
 
 CLEAN.include("doc")
 

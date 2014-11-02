@@ -1,7 +1,7 @@
-require 'rubygems'
-require 'rake'
-require 'rake/clean'
-require_relative 'lib/work_queue'
+require "rubygems"
+require "rake"
+require "rake/clean"
+require_relative "lib/work_queue"
 
 # Load all rakefile extensions
 Dir["#{File.dirname(__FILE__)}/tasks/*.rake"].each { |ext| load ext }

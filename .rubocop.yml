@@ -1,0 +1,20 @@
+Documentation:
+  Enabled: false
+
+HashSyntax:
+   EnforcedStyle: hash_rockets
+
+Metrics/AbcSize:
+  Max: 30
+
+Metrics/ClassLength:
+  Enabled: false
+
+Metrics/LineLength:
+  Max: 100
+
+Metrics/MethodLength:
+  Max: 20
+
+StringLiterals:
+  EnforcedStyle: double_quotes
